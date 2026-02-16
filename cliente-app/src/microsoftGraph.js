@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3001/api';
+const API_URL = import.meta.env.PROD 
+  ? '/api' 
+  : 'http://localhost:3001/api';
 const SITE_ID = import.meta.env.VITE_MS_SITE_ID;
 
 // Agregar fila al Excel
