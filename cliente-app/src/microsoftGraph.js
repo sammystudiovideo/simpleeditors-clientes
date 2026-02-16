@@ -7,11 +7,6 @@ const API_URL = import.meta.env.PROD
 // Agregar fila al Excel
 export async function addRowToExcel(clientData) {
   try {
-    // ✅ ORDEN CORRECTO según tu Excel (16 columnas):
-    // A=Código, B=Empresa, C=País, D=Teléfono, E=Contactos, F=Emails,
-    // G=Columna1, H=Tipo Trabajo, I=Estilo, J=Status, K=Fecha 1er Contacto,
-    // L=Creado Por, M=Fecha Registro, N=Editado Por, O=Notas, P=(columna 16)
-    
     const row = [
       clientData.codigo || '',                    // A - Código
       clientData.empresa || '',                   // B - Empresa
@@ -33,13 +28,12 @@ export async function addRowToExcel(clientData) {
 
     console.log('📤 Enviando al Excel:', row);
     
-    // ✅ SIN el siteId - tu API no lo necesita
     const response = await axios.post(`${API_URL}/add-row`, { row });
     console.log('✅ Cliente agregado al Excel:', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ Error agregando al Excel:', error.response?.data || error.message);
-    throw error;  // Re-lanzar para que App.jsx pueda manejarlo
+    throw error;
   }
 }
 
@@ -83,4 +77,10 @@ export async function updateRowInExcel(codigo, clientData) {
 export async function deleteRowFromExcel(codigo) {
   try {
     const response = await axios.delete(`${API_URL}/delete-row/${codigo}`);
-    con
+    console.log('✅ Cliente eliminado del Excel:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ Error eliminando del Excel:', error.response?.data || error.message);
+    throw error;
+  }
+}
