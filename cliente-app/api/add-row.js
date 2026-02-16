@@ -1,7 +1,6 @@
 import axios from 'axios';
 
 export default async function handler(req, res) {
-  // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -15,7 +14,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 1. Obtener Token (SIN el prefijo VITE_)
+    // 1. Obtener Token
     const tokenRes = await axios.post(
       `https://login.microsoftonline.com/${process.env.MS_TENANT_ID}/oauth2/v2.0/token`,
       new URLSearchParams({
@@ -30,9 +29,22 @@ export default async function handler(req, res) {
     );
     
     const token = tokenRes.data.access_token;
+    console.log('✅ Token obtenido');
 
-    // 2. Agregar fila a la tabla de Excel
-    const url = `https://graph.microsoft.com/v1.0/sites/${process.env.MS_SITE_ID}/drive/items/${process.env.MS_FILE_ID}/workbook/tables/TablaClientes/rows`;
+    // 2. Primero obtener el Site ID real usando la ruta
+    const siteUrl = `https://graph.microsoft.com/v1.0/sites/${process.env.MS_SITE_ID}`;
+    console.log('🔍 Obteniendo Site ID desde:', siteUrl);
+    
+    const siteRes = await axios.get(siteUrl, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    
+    const realSiteId = siteRes.data.id;
+    console.log('✅ Site ID real obtenido:', realSiteId);
+
+    // 3. Ahora usar el Site ID real para agregar la fila
+    const url = `https://graph.microsoft.com/v1.0/sites/${realSiteId}/drive/items/${process.env.MS_FILE_ID}/workbook/tables/TablaClientes/rows`;
+    console.log('📤 Agregando fila a:', url);
     
     const graphRes = await axios.post(
       url, 
@@ -45,21 +57,24 @@ export default async function handler(req, res) {
       }
     );
 
+    console.log('✅ Fila agregada exitosamente');
     return res.status(200).json({ success: true, data: graphRes.data });
     
   } catch (error) {
-    // Log detallado del error
     const errorDetail = {
       message: error.message,
       status: error.response?.status,
+      statusText: error.response?.statusText,
       data: error.response?.data,
-      url: error.config?.url
+      url: error.config?.url,
+      requestData: error.config?.data
     };
     
-    console.error("❌ Error al agregar fila:", JSON.stringify(errorDetail, null, 2));
+    console.error("❌ Error completo:", JSON.stringify(errorDetail, null, 2));
     
     return res.status(error.response?.status || 500).json({ 
-      error: errorDetail.data || errorDetail.message 
+      error: errorDetail.data || errorDetail.message,
+      details: errorDetail
     });
   }
 }
