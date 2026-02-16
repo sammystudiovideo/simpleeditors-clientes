@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Site ID</title>
+  <style>
+    body {
+      font-family: monospace;
+      padding: 20px;
+      background: #1e1e1e;
+      color: #fff;
+    }
+    #result {
+      background: #2d2d2d;
+      padding: 20px;
+      border-radius: 8px;
+      white-space: pre-wrap;
+      font-size: 14px;
+    }
+    .success { color: #4ec9b0; }
+    .error { color: #f48771; }
+    .info { color: #dcdcaa; }
+  </style>
+</head>
+<body>
+  <h1>🔍 Obteniendo Site ID de SharePoint</h1>
+  <div id="result">Procesando...</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    const CLIENT_ID = 'd7774683-764b-47f3-b7b1-9a6918e3b29c';
+    const TENANT_ID = '5ce365c6-c562-498a-8045-4f67646ae538';
+    const CLIENT_SECRET = 'Kov8Q~HH4vmnZfsWyuTcJKnhi5TaweHHfK03Ea37';
+    const FILE_ID = 'ddb13b89-2187-4ff2-bdcd-80391122624c';
+
+    async function test() {
+      const result = document.getElementById('result');
+      let log = '';
+
+      try {
+        log += '🔐 Step 1: Obteniendo token de acceso...\n';
+        result.innerHTML = `<span class="info">${log}</span>`;
+        
+        const tokenResponse = await axios.post(
+          `https://login.microsoftonline.com/${TENANT_ID}/oauth2/v2.0/token`,
+          new URLSearchParams({
+            client_id: CLIENT_ID,
+            client_secret: CLIENT_SECRET,
+            scope: 'https://graph.microsoft.com/.default',
+            grant_type: 'client_credentials',
+          }),
+          {
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          }
+        );
+
+        const token = tokenResponse.data.access_token;
+        log += '<span class="success">✅ Token obtenido correctamente</span>\n\n';
+        result.innerHTML = log;
+
+        log += '🌐 Step 2: Obteniendo Site ID...\n';
+        result.innerHTML = log;
+        
+        const siteResponse = await axios.get(
+          'https://graph.microsoft.com/v1.0/sites/simpleeditors.sharepoint.com:/sites/Admin',
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        const siteId = siteResponse.data.id;
+        log += '<span class="success">✅ Site ID obtenido</span>\n\n';
+        log += '═══════════════════════════════════════════════════\n';
+        log += '<span class="info">📋 COPIA ESTA LÍNEA EN TU ARCHIVO .env:</span>\n';
+        log += '═══════════════════════════════════════════════════\n';
+        log += `<span class="success">VITE_MS_SITE_ID=${siteId}</span>\n`;
+        log += '═══════════════════════════════════════════════════\n\n';
+        result.innerHTML = log;
+
+        log += '📄 Step 3: Verificando acceso al archivo Excel...\n';
+        result.innerHTML = log;
+        
+        const fileResponse = await axios.get(
+          `https://graph.microsoft.com/v1.0/sites/${siteId}/drive/items/${FILE_ID}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        log += `<span class="success">✅ Archivo encontrado: "${fileResponse.data.name}"</span>\n\n`;
+        result.innerHTML = log;
+
+        log += '📊 Step 4: Verificando tabla TablaClientes...\n';
+        result.innerHTML = log;
+        
+        const tableResponse = await axios.get(
+          `https://graph.microsoft.com/v1.0/sites/${siteId}/drive/items/${FILE_ID}/workbook/tables/TablaClientes`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        log += `<span class="success">✅ Tabla encontrada: "${tableResponse.data.name}"</span>\n\n`;
+        log += '<span class="success">🎉 ¡TODO FUNCIONA CORRECTAMENTE!</span>\n';
+        log += '<span class="info">Ahora copia el VITE_MS_SITE_ID de arriba y pégalo en tu archivo .env</span>\n';
+        result.innerHTML = log;
+
+      } catch (error) {
+        log += '\n<span class="error">❌ ERROR ENCONTRADO:</span>\n';
+        log += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+        log += `<span class="error">Status: ${error.response?.status || 'No status'}</span>\n`;
+        log += `<span class="error">Mensaje: ${error.response?.data?.error?.message || error.message}</span>\n\n`;
+        log += '<span class="error">Detalles completos:</span>\n';
+        log += `<span class="error">${JSON.stringify(error.response?.data, null, 2)}</span>\n`;
+        log += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+        result.innerHTML = log;
+      }
+    }
+
+    test();
+  </script>
+</body>
+</html>
+```
+
+## Paso 2: Ejecutar el test
+
+1. Abre el archivo `testSiteId.html` en tu navegador (doble clic)
+2. **Espera unos segundos**
+3. Verás el resultado en pantalla
+
+## Paso 3: Copia el Site ID
+
+Si todo sale bien, verás algo como:
+```
+VITE_MS_SITE_ID=simpleeditors.sharepoint.com,abc-123-def,456-ghi-789
