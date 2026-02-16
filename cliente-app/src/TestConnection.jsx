@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3001/api';
+const API_URL = import.meta.env.PROD 
+  ? '/api' 
+  : 'http://localhost:3001/api';
 
 export default function TestConnection() {
   const [result, setResult] = useState('');
