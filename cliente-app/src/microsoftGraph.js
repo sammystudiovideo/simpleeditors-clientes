@@ -7,7 +7,6 @@ const API_URL = import.meta.env.PROD
 // Agregar fila al Excel
 export async function addRowToExcel(clientData) {
   try {
-    // ✅ 15 columnas (A hasta O)
     const row = [
       clientData.codigo || '',                    // A - Código
       clientData.empresa || '',                   // B - Empresa
@@ -41,7 +40,6 @@ export async function addRowToExcel(clientData) {
 // Actualizar fila en Excel
 export async function updateRowInExcel(codigo, clientData) {
   try {
-    // ✅ 15 columnas (A hasta O)
     const updatedRow = [
       clientData.codigo || '',
       clientData.empresa || '',
@@ -49,7 +47,7 @@ export async function updateRowInExcel(codigo, clientData) {
       clientData.telefono || '',
       clientData.contactos?.map(c => `${c.nombre} ${c.apellido}${c.rol ? ` (${c.rol})` : ''}`).join('; ') || '',
       clientData.emails?.map(e => `${e.email}${e.nota ? ` (${e.nota})` : ''}`).join('; ') || '',
-      '',                                         // Columna1 vacía
+      '',                                         // G - Columna1 (vacía)
       clientData.tipoTrabajo || '',
       clientData.tipoEstilo || '',
       clientData.status || 'Activo',
@@ -70,19 +68,21 @@ export async function updateRowInExcel(codigo, clientData) {
     console.log('✅ Cliente actualizado en Excel:', response.data);
     return response.data;
   } catch (error) {
-    console.error('❌ Error actualizando en Excel:', error.response?.data || error.message);
-    throw error;
+    // ⚠️ Si no está en Excel, no bloqueamos la actualización en Firebase
+    console.warn('⚠️ No se pudo actualizar en Excel:', error.response?.data || error.message);
+    return null;
   }
 }
 
 // Eliminar fila del Excel
 export async function deleteRowFromExcel(codigo) {
   try {
-    const response = await axios.delete(`${API_URL}/delete-row/${codigo}`);
+    const response = await axios.delete(`${API_URL}/delete-row?codigo=${codigo}`);
     console.log('✅ Cliente eliminado del Excel:', response.data);
     return response.data;
   } catch (error) {
-    console.error('❌ Error eliminando del Excel:', error.response?.data || error.message);
-    throw error;
+    // ⚠️ Si no está en Excel, no bloqueamos el borrado en Firebase
+    console.warn('⚠️ No se pudo eliminar del Excel (puede que no exista):', error.response?.data || error.message);
+    return null;
   }
 }
