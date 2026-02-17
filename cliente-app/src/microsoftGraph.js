@@ -7,6 +7,7 @@ const API_URL = import.meta.env.PROD
 // Agregar fila al Excel
 export async function addRowToExcel(clientData) {
   try {
+    // ✅ 15 columnas (A hasta O)
     const row = [
       clientData.codigo || '',                    // A - Código
       clientData.empresa || '',                   // B - Empresa
@@ -22,11 +23,11 @@ export async function addRowToExcel(clientData) {
       clientData.creadoPor || '',                 // L - Creado Por
       clientData.fechaRegistro || '',             // M - Fecha Registro
       clientData.editadoPor || '',                // N - Editado Por
-      clientData.notas || '',                     // O - Notas
-      ''                                          // P - Columna 16 (vacía)
+      clientData.notas || ''                      // O - Notas
     ];
 
     console.log('📤 Enviando al Excel:', row);
+    console.log('📏 Número de columnas:', row.length);
     
     const response = await axios.post(`${API_URL}/add-row`, { row });
     console.log('✅ Cliente agregado al Excel:', response.data);
@@ -40,6 +41,7 @@ export async function addRowToExcel(clientData) {
 // Actualizar fila en Excel
 export async function updateRowInExcel(codigo, clientData) {
   try {
+    // ✅ 15 columnas (A hasta O)
     const updatedRow = [
       clientData.codigo || '',
       clientData.empresa || '',
@@ -55,11 +57,11 @@ export async function updateRowInExcel(codigo, clientData) {
       clientData.creadoPor || '',
       clientData.fechaRegistro || '',
       clientData.editadoPor || '',
-      clientData.notas || '',
-      ''                                          // Columna 16 vacía
+      clientData.notas || ''
     ];
 
     console.log('📤 Actualizando Excel:', { codigo, row: updatedRow });
+    console.log('📏 Número de columnas:', updatedRow.length);
     
     const response = await axios.patch(`${API_URL}/update-row`, { 
       codigo, 
