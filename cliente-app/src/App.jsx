@@ -1,5 +1,5 @@
 import TestConnection from './TestConnection';
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { collection, getDocs, setDoc, doc, deleteDoc, getDoc } from "firebase/firestore";
 import { db } from "./firebase";
 import "./App.css";
@@ -379,7 +379,7 @@ function ReferenciasVisualesBlock({ referencias, onChange, onAdd, onRemove }) {
 }
 
 // ── Tipo de compa&#241;&#237;a con categor&#237;a custom ─────────────────
-function TipoCompaniaSelect({ value, onChange, allTipos, onAddTipo }) {
+function TipoCompaniaSelect({ value, onChange, allTipos, onAddTipo, onDeleteTipo }) {
   const [newTipo, setNewTipo] = useState("");
   const [showAdd, setShowAdd] = useState(false);
 
@@ -392,33 +392,37 @@ function TipoCompaniaSelect({ value, onChange, allTipos, onAddTipo }) {
     setShowAdd(false);
   };
 
+  const handleDelete = (tipo) => {
+    if (onDeleteTipo) onDeleteTipo(tipo);
+    if (value === tipo) onChange({ target: { name: "tipoCompania", value: "" } });
+  };
+
   return (
     <div>
       <select name="tipoCompania" value={value} onChange={onChange}>
-        <option value="">&#8212; Sin tipo &#8212;</option>
+        <option value="">— Sin tipo —</option>
         {allTipos.map((t) => <option key={t}>{t}</option>)}
       </select>
-      <button
-        type="button"
-        className="btn-add-small"
-        style={{ marginTop: 6 }}
-        onClick={() => setShowAdd(!showAdd)}
-      >
-        + Agregar categor&#237;a
-      </button>
-      {showAdd && (
-        <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-          <input
-            value={newTipo}
-            onChange={(e) => setNewTipo(e.target.value)}
-            placeholder="Nueva categor&#237;a..."
-            onKeyDown={(e) => e.key === "Enter" && handleAdd()}
-            style={{ flex: 1 }}
-          />
-          <button className="btn btn-primary" style={{ marginTop: 0, padding: "6px 14px" }} onClick={handleAdd}>&#193;&#241;adir</button>
-          <button className="btn btn-ghost" style={{ marginTop: 0, padding: "6px 14px" }} onClick={() => setShowAdd(false)}>&#10005;</button>
+      {allTipos.length > 0 && (
+        <div style={{ marginTop: 6, display: "flex", flexWrap: "wrap", gap: 4 }}>
+          {allTipos.map((t) => (
+            <span key={t} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 6, padding: "2px 8px", fontSize: 12 }}>
+              {t}
+              <button type="button" onClick={() => handleDelete(t)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--muted)", padding: "0 2px", fontSize: 14, lineHeight: 1 }} title={"Borrar " + t}>&#10005;</button>
+            </span>
+          ))}
         </div>
       )}
+      <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+        <input
+          value={newTipo}
+          onChange={(e) => setNewTipo(e.target.value)}
+          placeholder="Escribe una categoría y pulsa Añadir..."
+          onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+          style={{ flex: 1 }}
+        />
+        <button className="btn btn-primary" style={{ marginTop: 0, padding: "6px 14px" }} onClick={handleAdd} type="button">+ Añadir</button>
+      </div>
     </div>
   );
 }
@@ -592,6 +596,22 @@ export default function App() {
   const [tab, setTab] = useState("register");
   const [counters, setCounters] = useState({});
   const [clients, setClients] = useState({});
+  // ── Undo system ─────────────────────────────────────────
+  const [undoStack, setUndoStack] = useState([]);
+  const [undoToast, setUndoToast] = useState(null);
+  const undoToastTimer = useRef(null);
+
+  const showUndoToast = (msg) => {
+    setUndoToast(msg);
+    clearTimeout(undoToastTimer.current);
+    undoToastTimer.current = setTimeout(() => setUndoToast(null), 3000);
+  };
+
+  const pushUndo = useCallback((action) => {
+    setUndoStack((prev) => [...prev.slice(-49), action]);
+  }, []);
+
+  // ── Loading & form ───────────────────────────────────────
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState(defaultForm());
   const [generatedCode, setGeneratedCode] = useState(null);
@@ -704,6 +724,14 @@ export default function App() {
     const updated = [...tiposCompania, nuevo];
     setTiposCompania(updated);
     saveOptions(tiposTrabajo, tiposEstilo, updated);
+    pushUndo({ tipo: "addCategoria", categoria: "compania", valor: nuevo, descripcion: `Categoría añadida: "${nuevo}"` });
+  };
+
+  const handleDeleteTipoCompania = (tipo) => {
+    const updated = tiposCompania.filter((t) => t !== tipo);
+    setTiposCompania(updated);
+    saveOptions(tiposTrabajo, tiposEstilo, updated);
+    pushUndo({ tipo: "deleteCategoria", categoria: "compania", valor: tipo, descripcion: `Categoría eliminada: "${tipo}"` });
   };
 
   // ── Filtros ──────────────────────────────────────────────
@@ -759,6 +787,69 @@ export default function App() {
     setNewUsername(""); setNewPassword(""); setShowAddUser(false);
   };
 
+  // ── Ctrl+Z global undo ──────────────────────────────────
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "z") {
+        e.preventDefault();
+        setUndoStack((prev) => {
+          if (prev.length === 0) return prev;
+          const last = prev[prev.length - 1];
+          const rest = prev.slice(0, -1);
+          // Apply undo based on action type
+          if (last.tipo === "field" && last._setter) {
+            last._setter((f) => ({ ...f, [last.field]: last.prev }));
+            showUndoToast(`↩ Deshecho: ${last.descripcion}`);
+          } else if (last.tipo === "addCategoria" && last.categoria === "compania") {
+            setTiposCompania((tc) => {
+              const updated = tc.filter((t) => t !== last.valor);
+              saveOptions(tiposTrabajo, tiposEstilo, updated);
+              return updated;
+            });
+            showUndoToast(`↩ Deshecho: ${last.descripcion}`);
+          } else if (last.tipo === "deleteCategoria" && last.categoria === "compania") {
+            setTiposCompania((tc) => {
+              const updated = [...tc, last.valor];
+              saveOptions(tiposTrabajo, tiposEstilo, updated);
+              return updated;
+            });
+            showUndoToast(`↩ Deshecho: ${last.descripcion}`);
+          } else if (last.tipo === "addContact") {
+            last._setter((f) => ({ ...f, contactos: f.contactos.slice(0, -1) }));
+            showUndoToast("↩ Deshecho: contacto añadido");
+          } else if (last.tipo === "removeContact") {
+            last._setter((f) => ({ ...f, contactos: [...f.contactos.slice(0, last.index), last.valor, ...f.contactos.slice(last.index)] }));
+            showUndoToast("↩ Deshecho: contacto eliminado");
+          } else if (last.tipo === "addProyecto") {
+            last._setter((f) => ({ ...f, proyectos: f.proyectos.slice(0, -1) }));
+            showUndoToast("↩ Deshecho: proyecto añadido");
+          } else if (last.tipo === "removeProyecto") {
+            last._setter((f) => ({ ...f, proyectos: [...f.proyectos.slice(0, last.index), last.valor, ...f.proyectos.slice(last.index)] }));
+            showUndoToast("↩ Deshecho: proyecto eliminado");
+          } else if (last.tipo === "addFecha") {
+            last._setter((f) => ({ ...f, fechasEntrega: f.fechasEntrega.slice(0, -1) }));
+            showUndoToast("↩ Deshecho: fecha añadida");
+          } else if (last.tipo === "removeFecha") {
+            last._setter((f) => ({ ...f, fechasEntrega: [...f.fechasEntrega.slice(0, last.index), last.valor, ...f.fechasEntrega.slice(last.index)] }));
+            showUndoToast("↩ Deshecho: fecha eliminada");
+          } else if (last.tipo === "addRef") {
+            last._setter((f) => ({ ...f, referenciasVisuales: f.referenciasVisuales.slice(0, -1) }));
+            showUndoToast("↩ Deshecho: referencia añadida");
+          } else if (last.tipo === "removeRef") {
+            last._setter((f) => ({ ...f, referenciasVisuales: [...f.referenciasVisuales.slice(0, last.index), last.valor, ...f.referenciasVisuales.slice(last.index)] }));
+            showUndoToast("↩ Deshecho: referencia eliminada");
+          } else {
+            showUndoToast("↩ Nada que deshacer");
+            return prev;
+          }
+          return rest;
+        });
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [tiposTrabajo, tiposEstilo]);
+
   // ── Firebase helpers ─────────────────────────────────────
   const saveClientToFirebase = async (code, data) => {
     try { await setDoc(doc(db, "clients", code), data); }
@@ -783,29 +874,34 @@ export default function App() {
   };
 
   // ── Helpers de form ──────────────────────────────────────
-  const makeHandlers = (setter) => ({
-    onChange: (e) => setter((f) => ({ ...f, [e.target.name]: e.target.value })),
+  const makeHandlers = (setter, label) => ({
+    onChange: (e) => {
+      setter((f) => {
+        pushUndo({ tipo: "field", label: label || "formulario", field: e.target.name, prev: f[e.target.name], descripcion: `Campo editado: ${e.target.name}`, _setter: setter });
+        return { ...f, [e.target.name]: e.target.value };
+      });
+    },
     onContactChange: (i, field, value) => setter((f) => ({ ...f, contactos: f.contactos.map((c, idx) => idx === i ? { ...c, [field]: value } : c) })),
-    onAddContact: () => setter((f) => ({ ...f, contactos: [...f.contactos, emptyContact()] })),
-    onRemoveContact: (i) => setter((f) => ({ ...f, contactos: f.contactos.filter((_, idx) => idx !== i) })),
+    onAddContact: () => { pushUndo({ tipo: "addContact", _setter: setter }); setter((f) => ({ ...f, contactos: [...f.contactos, emptyContact()] })); },
+    onRemoveContact: (i) => setter((f) => { pushUndo({ tipo: "removeContact", index: i, valor: f.contactos[i], _setter: setter }); return { ...f, contactos: f.contactos.filter((_, idx) => idx !== i) }; }),
     onEmailChange: (i, field, value) => setter((f) => ({ ...f, emails: f.emails.map((e, idx) => idx === i ? { ...e, [field]: value } : e) })),
     onAddEmail: () => setter((f) => ({ ...f, emails: [...f.emails, emptyEmail()] })),
     onRemoveEmail: (i) => setter((f) => ({ ...f, emails: f.emails.filter((_, idx) => idx !== i) })),
     onProyectoChange: (i, field, value) => setter((f) => ({ ...f, proyectos: f.proyectos.map((p, idx) => idx === i ? { ...p, [field]: value } : p) })),
-    onAddProyecto: () => setter((f) => ({ ...f, proyectos: [...f.proyectos, emptyProyecto()] })),
-    onRemoveProyecto: (i) => setter((f) => ({ ...f, proyectos: f.proyectos.filter((_, idx) => idx !== i) })),
+    onAddProyecto: () => { pushUndo({ tipo: "addProyecto", _setter: setter }); setter((f) => ({ ...f, proyectos: [...f.proyectos, emptyProyecto()] })); },
+    onRemoveProyecto: (i) => setter((f) => { pushUndo({ tipo: "removeProyecto", index: i, valor: f.proyectos[i], _setter: setter }); return { ...f, proyectos: f.proyectos.filter((_, idx) => idx !== i) }; }),
     onFechaEntregaChange: (i, field, value) => setter((f) => ({ ...f, fechasEntrega: f.fechasEntrega.map((fe, idx) => idx === i ? { ...fe, [field]: value } : fe) })),
-    onAddFechaEntrega: () => setter((f) => ({ ...f, fechasEntrega: [...f.fechasEntrega, emptyFechaEntrega()] })),
-    onRemoveFechaEntrega: (i) => setter((f) => ({ ...f, fechasEntrega: f.fechasEntrega.filter((_, idx) => idx !== i) })),
+    onAddFechaEntrega: () => { pushUndo({ tipo: "addFecha", _setter: setter }); setter((f) => ({ ...f, fechasEntrega: [...f.fechasEntrega, emptyFechaEntrega()] })); },
+    onRemoveFechaEntrega: (i) => setter((f) => { pushUndo({ tipo: "removeFecha", index: i, valor: f.fechasEntrega[i], _setter: setter }); return { ...f, fechasEntrega: f.fechasEntrega.filter((_, idx) => idx !== i) }; }),
     onRefVisualChange: (i, field, value) => setter((f) => ({ ...f, referenciasVisuales: f.referenciasVisuales.map((r, idx) => idx === i ? { ...r, [field]: value } : r) })),
-    onAddRefVisual: () => setter((f) => ({ ...f, referenciasVisuales: [...f.referenciasVisuales, emptyReferenciaVisual()] })),
-    onRemoveRefVisual: (i) => setter((f) => ({ ...f, referenciasVisuales: f.referenciasVisuales.filter((_, idx) => idx !== i) })),
+    onAddRefVisual: () => { pushUndo({ tipo: "addRef", _setter: setter }); setter((f) => ({ ...f, referenciasVisuales: [...f.referenciasVisuales, emptyReferenciaVisual()] })); },
+    onRemoveRefVisual: (i) => setter((f) => { pushUndo({ tipo: "removeRef", index: i, valor: f.referenciasVisuales[i], _setter: setter }); return { ...f, referenciasVisuales: f.referenciasVisuales.filter((_, idx) => idx !== i) }; }),
     onEstilosChange: (arr) => setter((f) => ({ ...f, tiposEstilo: arr })),
     onCompaniaBlur: (value) => { if (value && !tiposCompania.includes(value)) handleAddTipoCompania(value); },
   });
 
-  const formH = makeHandlers(setForm);
-  const editH = makeHandlers(setEditForm);
+  const formH = makeHandlers(setForm, "registro");
+  const editH = makeHandlers(setEditForm, "edición");
 
   // ── Registro ─────────────────────────────────────────────
   const handleRegister = async () => {
@@ -875,6 +971,7 @@ export default function App() {
             onChange={handlers.onChange}
             allTipos={tiposCompania}
             onAddTipo={handleAddTipoCompania}
+            onDeleteTipo={handleDeleteTipoCompania}
           />
         </div>
         <div className="form-group">
@@ -1236,6 +1333,20 @@ export default function App() {
   // ── APP ───────────────────────────────────────────────────
   return (
     <div className="app">
+      {/* Undo toast notification */}
+      {undoToast && (
+        <div style={{
+          position: "fixed", bottom: 28, left: "50%", transform: "translateX(-50%)",
+          background: "#1a1a2e", border: "1px solid rgba(201,168,76,0.4)",
+          color: "#e8e8e8", borderRadius: 10, padding: "12px 22px",
+          fontSize: 14, zIndex: 9999, boxShadow: "0 4px 24px rgba(0,0,0,0.5)",
+          display: "flex", alignItems: "center", gap: 10, whiteSpace: "nowrap",
+          animation: "fadeInUp 0.2s ease"
+        }}>
+          <span style={{ color: "var(--accent)" }}>⌨️</span> {undoToast}
+          <button onClick={() => setUndoToast(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--muted)", fontSize: 16, marginLeft: 4 }}>✕</button>
+        </div>
+      )}
       <div className="header">
         <div className="header-badge">⚡ Sistema de Clientes</div>
         <h1>Gestión de <span>Clientes</span></h1>
