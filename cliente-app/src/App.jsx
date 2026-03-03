@@ -415,11 +415,12 @@ function TipoCompaniaSelect({ value, onChange, allTipos, onAddTipo, onDeleteTipo
       )}
       <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
         <input
+          className="tipo-compania-input"
           value={newTipo}
           onChange={(e) => setNewTipo(e.target.value)}
           placeholder="Escribe una categoría y pulsa Añadir..."
           onKeyDown={(e) => e.key === "Enter" && handleAdd()}
-          style={{ flex: 1 }}
+          style={{ flex: 1, color: "var(--text, #e8e8e8)", background: "var(--surface2, #1e1e2e)", WebkitTextFillColor: "var(--text, #e8e8e8)" }}
         />
         <button className="btn btn-primary" style={{ marginTop: 0, padding: "6px 14px" }} onClick={handleAdd} type="button">+ Añadir</button>
       </div>

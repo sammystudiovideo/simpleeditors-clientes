@@ -321,3 +321,14 @@ input[type="date"] { color-scheme: dark; }
   from { opacity: 0; transform: translateX(-50%) translateY(12px); }
   to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
+
+/* ── Fix visibilidad texto en TipoCompaniaSelect ── */
+.tipo-compania-input {
+  color: var(--text) !important;
+  background: var(--surface2) !important;
+  -webkit-text-fill-color: var(--text) !important;
+}
+.tipo-compania-input::placeholder {
+  color: var(--muted) !important;
+  -webkit-text-fill-color: var(--muted) !important;
+}
