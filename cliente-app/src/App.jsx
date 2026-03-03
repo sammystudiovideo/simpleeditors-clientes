@@ -252,11 +252,14 @@ const defaultForm = () => ({
   telefono: "+34",
   tipoCompania: "",
   tipoTrabajo: "Desconocido",
+  tiposTrabajo: [],
   tiposEstilo: [],
   status: "Activo",
   notas: "",
   notasEditor: "",
   fechaPrimerContacto: "",
+  fechaUltimoContacto: "",
+  alarmaContacto: "",
   contactos: [emptyContact()],
   emails: [emptyEmail()],
   identidadMarca: "",
@@ -435,97 +438,63 @@ function TipoCompaniaSelect({ value, onChange, allTipos, onAddTipo, onDeleteTipo
 }
 
 // &#9472;&#9472; Estilos multi-select &#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;
-function EstilosMultiSelect({ selected, onChange, allEstilos, onAddEstilo }) {
-  const [newEstilo, setNewEstilo] = useState("");
-  const [showAdd, setShowAdd] = useState(false);
+// ── Componente reutilizable: multi-select chips con add/delete ──
+function MultiSelectChips({ selected, onChange, allOpciones, onAddOpcion, onDeleteOpcion, placeholder }) {
+  const [newVal, setNewVal] = useState("");
 
-  const toggle = (estilo) => {
-    if (selected.includes(estilo)) {
-      onChange(selected.filter((e) => e !== estilo));
-    } else {
-      onChange([...selected, estilo]);
-    }
+  const toggle = (op) => {
+    if (selected.includes(op)) onChange(selected.filter((e) => e !== op));
+    else onChange([...selected, op]);
   };
 
   const handleAdd = () => {
-    const trimmed = newEstilo.trim();
-    if (!trimmed || allEstilos.includes(trimmed)) return;
-    onAddEstilo(trimmed);
+    const trimmed = newVal.trim();
+    if (!trimmed || allOpciones.includes(trimmed)) return;
+    onAddOpcion(trimmed);
     onChange([...selected, trimmed]);
-    setNewEstilo("");
-    setShowAdd(false);
+    setNewVal("");
+  };
+
+  const handleDelete = (op) => {
+    if (onDeleteOpcion) onDeleteOpcion(op);
+    if (selected.includes(op)) onChange(selected.filter((e) => e !== op));
   };
 
   return (
     <div>
       <div className="estilos-grid">
-        {allEstilos.map((e) => (
-          <label key={e} className={`estilo-chip ${selected.includes(e) ? "selected" : ""}`}>
-            <input type="checkbox" checked={selected.includes(e)} onChange={() => toggle(e)} style={{ display: "none" }} />
-            {e}
+        {allOpciones.map((op) => (
+          <label key={op} className={`estilo-chip ${selected.includes(op) ? "selected" : ""}`} style={{ position: "relative", paddingRight: 22 }}>
+            <input type="checkbox" checked={selected.includes(op)} onChange={() => toggle(op)} style={{ display: "none" }} />
+            {op}
+            <span
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDelete(op); }}
+              style={{ position: "absolute", right: 5, top: "50%", transform: "translateY(-50%)", cursor: "pointer", fontSize: 10, opacity: 0.5, lineHeight: 1 }}
+              title={"Borrar " + op}
+            >✕</span>
           </label>
         ))}
-        <button className="btn-add-small" onClick={() => setShowAdd(!showAdd)} type="button">+ Nuevo estilo</button>
       </div>
-      {showAdd && (
-        <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-          <input
-            value={newEstilo}
-            onChange={(e) => setNewEstilo(e.target.value)}
-            placeholder="Nombre del estilo..."
-            onKeyDown={(e) => e.key === "Enter" && handleAdd()}
-            style={{ flex: 1 }}
-          />
-          <button className="btn btn-primary" style={{ marginTop: 0, padding: "6px 14px" }} onClick={handleAdd}>Añadir</button>
-          <button className="btn btn-ghost" style={{ marginTop: 0, padding: "6px 14px" }} onClick={() => setShowAdd(false)}>✕</button>
-        </div>
-      )}
+      <input
+        value={newVal}
+        onChange={(e) => setNewVal(e.target.value)}
+        placeholder={placeholder || "Nueva categoría..."}
+        onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+        style={{ marginTop: 8, width: "100%", boxSizing: "border-box" }}
+      />
+      <button className="btn-add-small" onClick={handleAdd} type="button" style={{ marginTop: 6, width: "100%" }}>
+        + Añadir categoría
+      </button>
     </div>
   );
 }
 
-// ── Tipo de trabajo con categoría custom ───────────────────
-function TipoTrabajoSelect({ value, onChange, allTipos, onAddTipo }) {
-  const [newTipo, setNewTipo] = useState("");
-  const [showAdd, setShowAdd] = useState(false);
-
-  const handleAdd = () => {
-    const trimmed = newTipo.trim();
-    if (!trimmed || allTipos.includes(trimmed)) return;
-    onAddTipo(trimmed);
-    onChange({ target: { name: "tipoTrabajo", value: trimmed } });
-    setNewTipo("");
-    setShowAdd(false);
-  };
-
-  return (
-    <div>
-      <select name="tipoTrabajo" value={value} onChange={onChange}>
-        {allTipos.map((t) => <option key={t}>{t}</option>)}
-      </select>
-      <button
-        type="button"
-        className="btn-add-small"
-        style={{ marginTop: 6 }}
-        onClick={() => setShowAdd(!showAdd)}
-      >
-        + Agregar categoría
-      </button>
-      {showAdd && (
-        <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-          <input
-            value={newTipo}
-            onChange={(e) => setNewTipo(e.target.value)}
-            placeholder="Nueva categoría..."
-            onKeyDown={(e) => e.key === "Enter" && handleAdd()}
-            style={{ flex: 1 }}
-          />
-          <button className="btn btn-primary" style={{ marginTop: 0, padding: "6px 14px" }} onClick={handleAdd}>Añadir</button>
-          <button className="btn btn-ghost" style={{ marginTop: 0, padding: "6px 14px" }} onClick={() => setShowAdd(false)}>✕</button>
-        </div>
-      )}
-    </div>
-  );
+// Aliases para compatibilidad
+function EstilosMultiSelect({ selected, onChange, allEstilos, onAddEstilo, onDeleteEstilo }) {
+  return <MultiSelectChips selected={selected} onChange={onChange} allOpciones={allEstilos} onAddOpcion={onAddEstilo} onDeleteOpcion={onDeleteEstilo} placeholder="Nuevo estilo..." />;
+}
+function TipoTrabajoMultiSelect({ selected, onChange, allTipos, onAddTipo, onDeleteTipo }) {
+  return <MultiSelectChips selected={selected} onChange={onChange} allOpciones={allTipos} onAddOpcion={onAddTipo} onDeleteOpcion={onDeleteTipo} placeholder="Nuevo tipo de trabajo..." />;
 }
 
 // ── Export ficha para editor ───────────────────────────────
@@ -720,8 +689,20 @@ export default function App() {
     saveOptions(updated, tiposEstilo, tiposCompania);
   };
 
+  const handleDeleteTipoTrabajo = (tipo) => {
+    const updated = tiposTrabajo.filter((t) => t !== tipo);
+    setTiposTrabajo(updated);
+    saveOptions(updated, tiposEstilo, tiposCompania);
+  };
+
   const handleAddTipoEstilo = (nuevo) => {
     const updated = [...tiposEstilo, nuevo];
+    setTiposEstilo(updated);
+    saveOptions(tiposTrabajo, updated, tiposCompania);
+  };
+
+  const handleDeleteTipoEstilo = (tipo) => {
+    const updated = tiposEstilo.filter((t) => t !== tipo);
     setTiposEstilo(updated);
     saveOptions(tiposTrabajo, updated, tiposCompania);
   };
@@ -903,6 +884,7 @@ export default function App() {
     onRefVisualChange: (i, field, value) => setter((f) => ({ ...f, referenciasVisuales: f.referenciasVisuales.map((r, idx) => idx === i ? { ...r, [field]: value } : r) })),
     onAddRefVisual: () => { pushUndo({ tipo: "addRef", _setter: setter }); setter((f) => ({ ...f, referenciasVisuales: [...f.referenciasVisuales, emptyReferenciaVisual()] })); },
     onRemoveRefVisual: (i) => setter((f) => { pushUndo({ tipo: "removeRef", index: i, valor: f.referenciasVisuales[i], _setter: setter }); return { ...f, referenciasVisuales: f.referenciasVisuales.filter((_, idx) => idx !== i) }; }),
+    onTrabajosChange: (arr) => setter((f) => ({ ...f, tiposTrabajo: arr })),
     onEstilosChange: (arr) => setter((f) => ({ ...f, tiposEstilo: arr })),
     onCompaniaBlur: (value) => { if (value && !tiposCompania.includes(value)) handleAddTipoCompania(value); },
   });
@@ -1050,15 +1032,6 @@ export default function App() {
       <div className="section-title">🎯 Categorización</div>
       <div className="form-grid">
         <div className="form-group">
-          <label>Tipo de trabajo</label>
-          <TipoTrabajoSelect
-            value={f.tipoTrabajo}
-            onChange={handlers.onChange}
-            allTipos={tiposTrabajo}
-            onAddTipo={handleAddTipoTrabajo}
-          />
-        </div>
-        <div className="form-group">
           <label>Status</label>
           <select name="status" value={f.status} onChange={handlers.onChange}>
             {STATUS_OPTIONS.map((s) => <option key={s}>{s}</option>)}
@@ -1068,6 +1041,39 @@ export default function App() {
           <label>Fecha de primer contacto</label>
           <input type="date" name="fechaPrimerContacto" value={f.fechaPrimerContacto} onChange={handlers.onChange} />
         </div>
+        <div className="form-group">
+          <label>Fecha de último contacto</label>
+          <input type="date" name="fechaUltimoContacto" value={f.fechaUltimoContacto || ""} onChange={handlers.onChange} />
+        </div>
+      </div>
+
+      <div className="form-group" style={{ marginBottom: 12 }}>
+        <label>🔔 Alarma — volver a contactar</label>
+        <input
+          type="date"
+          name="alarmaContacto"
+          value={f.alarmaContacto || ""}
+          onChange={handlers.onChange}
+          style={{ maxWidth: 220 }}
+        />
+        {f.alarmaContacto && (
+          <div style={{ fontSize: 12, marginTop: 4, color: new Date(f.alarmaContacto) < new Date() ? "#e05c5c" : "var(--accent)" }}>
+            {new Date(f.alarmaContacto) < new Date()
+              ? "⚠️ Esta fecha ya pasó"
+              : `⏰ Recordatorio: ${new Date(f.alarmaContacto).toLocaleDateString("es-ES")}`}
+          </div>
+        )}
+      </div>
+
+      <div className="form-group" style={{ marginBottom: 16 }}>
+        <label>💼 Tipo de trabajo (puedes marcar varios)</label>
+        <TipoTrabajoMultiSelect
+          selected={f.tiposTrabajo || []}
+          onChange={handlers.onTrabajosChange}
+          allTipos={tiposTrabajo}
+          onAddTipo={handleAddTipoTrabajo}
+          onDeleteTipo={handleDeleteTipoTrabajo}
+        />
       </div>
 
       <div className="form-group" style={{ marginBottom: 16 }}>
@@ -1077,6 +1083,7 @@ export default function App() {
           onChange={handlers.onEstilosChange}
           allEstilos={tiposEstilo}
           onAddEstilo={handleAddTipoEstilo}
+          onDeleteEstilo={handleDeleteTipoEstilo}
         />
       </div>
 
@@ -1120,6 +1127,29 @@ export default function App() {
           <div className="result-field">
             <span className="result-field-label">Tipo compañía</span>
             <span className="result-field-value">{c.tipoCompania}</span>
+          </div>
+        )}
+        {c.fechaUltimoContacto && (
+          <div className="result-field">
+            <span className="result-field-label">Último contacto</span>
+            <span className="result-field-value">{new Date(c.fechaUltimoContacto).toLocaleDateString("es-ES")}</span>
+          </div>
+        )}
+        {c.alarmaContacto && (
+          <div className="result-field">
+            <span className="result-field-label">🔔 Alarma contacto</span>
+            <span className="result-field-value" style={{ color: new Date(c.alarmaContacto) < new Date() ? "#e05c5c" : "var(--accent)" }}>
+              {new Date(c.alarmaContacto).toLocaleDateString("es-ES")}
+              {new Date(c.alarmaContacto) < new Date() ? " ⚠️ Vencida" : ""}
+            </span>
+          </div>
+        )}
+        {c.tiposTrabajo?.length > 0 && (
+          <div className="result-field">
+            <span className="result-field-label">Tipos de trabajo</span>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+              {c.tiposTrabajo.map((t) => <span key={t} className={`tag ${TAG_TRABAJO[t] || "tag-desconocido"}`}>{t}</span>)}
+            </div>
           </div>
         )}
 
@@ -1539,6 +1569,14 @@ export default function App() {
                             <span className="client-row-dot">·</span>
                             <span>{paisNombre(c.pais)}</span>
                             {c.tipoCompania && <><span className="client-row-dot">·</span><span>{c.tipoCompania}</span></>}
+                            {c.alarmaContacto && new Date(c.alarmaContacto) <= new Date(Date.now() + 3 * 24 * 60 * 60 * 1000) && (
+                              <span className="client-row-dot">·</span>
+                            )}
+                            {c.alarmaContacto && new Date(c.alarmaContacto) <= new Date(Date.now() + 3 * 24 * 60 * 60 * 1000) && (
+                              <span style={{ color: new Date(c.alarmaContacto) < new Date() ? "#e05c5c" : "var(--accent)", fontWeight: 600, fontSize: 11 }}>
+                                {new Date(c.alarmaContacto) < new Date() ? "⚠️ Contactar" : "⏰ " + new Date(c.alarmaContacto).toLocaleDateString("es-ES")}
+                              </span>
+                            )}
                           </div>
                         </div>
                         <div className="client-row-tags">
