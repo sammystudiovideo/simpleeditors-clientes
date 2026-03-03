@@ -288,4 +288,30 @@ input[type="date"] { color-scheme: dark; }
 .login-title span { color: var(--accent); }
 .login-subtitle { font-size: 14px; color: var(--muted); }
 .login-form { padding: 28px 32px 32px; display: flex; flex-direction: column; gap: 16px; }
-.login-error { background: rgba(224,92,92,0.1); border: 1px solid rgba(224,92,92,0.25); color: #e08080; border-radius: 8px; padding: 10px 14px; font-size: 13px; }
+/* ── Número editable en proyectos/fechas/referencias ── */
+.numero-editable {
+  width: 46px !important;
+  min-width: 46px !important;
+  max-width: 46px !important;
+  text-align: center;
+  font-weight: 700;
+  color: var(--accent);
+  background: transparent;
+  border: 1px solid rgba(201,168,76,0.3) !important;
+  border-radius: 6px;
+  padding: 4px 6px !important;
+  font-size: 13px;
+  cursor: text;
+}
+.numero-editable:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 2px rgba(201,168,76,0.15) !important;
+}
+
+/* ── Estilos en fila de lista de clientes ── */
+.client-row-estilos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}

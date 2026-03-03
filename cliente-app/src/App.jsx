@@ -123,13 +123,18 @@ function EmailsBlock({ emails, onChange, onAdd, onRemove }) {
   );
 }
 
-// ── Proyectos ──────────────────────────────────────────────
+// ── Proyectos (número editable) ────────────────────────────
 function ProyectosBlock({ proyectos, onChange, onAdd, onRemove }) {
   return (
     <>
       {proyectos.map((p, i) => (
         <div className="contact-row" key={i}>
-          <div className="contact-num">{String(i + 1).padStart(2, "0")}</div>
+          <input
+            value={p.numero !== undefined && p.numero !== "" ? p.numero : String(i + 1).padStart(2, "0")}
+            onChange={(e) => onChange(i, "numero", e.target.value)}
+            className="numero-editable"
+            title="Número (editable)"
+          />
           <div className="contact-fields">
             <input value={p.nombre} onChange={(e) => onChange(i, "nombre", e.target.value)} placeholder="Nombre del proyecto" />
             <input value={p.link} onChange={(e) => onChange(i, "link", e.target.value)} placeholder="https://..." style={{ flex: 1.5 }} />
@@ -142,25 +147,21 @@ function ProyectosBlock({ proyectos, onChange, onAdd, onRemove }) {
   );
 }
 
-// ── Fechas de entrega ──────────────────────────────────────
+// ── Fechas de entrega (número editable) ───────────────────
 function FechasEntregaBlock({ fechas, onChange, onAdd, onRemove }) {
   return (
     <>
       {fechas.map((f, i) => (
         <div className="contact-row" key={i} style={{ alignItems: "center" }}>
-          <div className="contact-num">{String(i + 1).padStart(2, "0")}</div>
+          <input
+            value={f.numero !== undefined && f.numero !== "" ? f.numero : String(i + 1).padStart(2, "0")}
+            onChange={(e) => onChange(i, "numero", e.target.value)}
+            className="numero-editable"
+            title="Número (editable)"
+          />
           <div className="contact-fields">
-            <input
-              type="date"
-              value={f.fecha}
-              onChange={(e) => onChange(i, "fecha", e.target.value)}
-              style={{ maxWidth: 200 }}
-            />
-            <input
-              value={f.descripcion || ""}
-              onChange={(e) => onChange(i, "descripcion", e.target.value)}
-              placeholder="Descripción (opcional)"
-            />
+            <input type="date" value={f.fecha} onChange={(e) => onChange(i, "fecha", e.target.value)} style={{ maxWidth: 200 }} />
+            <input value={f.descripcion || ""} onChange={(e) => onChange(i, "descripcion", e.target.value)} placeholder="Descripción (opcional)" />
           </div>
           <button className="btn-remove" onClick={() => onRemove(i)}>✕</button>
         </div>
@@ -176,7 +177,12 @@ function ReferenciasVisualesBlock({ referencias, onChange, onAdd, onRemove }) {
     <>
       {referencias.map((r, i) => (
         <div className="contact-row" key={i}>
-          <div className="contact-num">{String(i + 1).padStart(2, "0")}</div>
+          <input
+            value={r.numero !== undefined && r.numero !== "" ? r.numero : String(i + 1).padStart(2, "0")}
+            onChange={(e) => onChange(i, "numero", e.target.value)}
+            className="numero-editable"
+            title="Número (editable)"
+          />
           <div className="contact-fields">
             <input value={r.link} onChange={(e) => onChange(i, "link", e.target.value)} placeholder="https://..." style={{ flex: 1.5 }} />
             <input value={r.nota} onChange={(e) => onChange(i, "nota", e.target.value)} placeholder="Nota sobre esta referencia..." />
@@ -231,6 +237,40 @@ function EstilosMultiSelect({ selected, onChange, allEstilos, onAddEstilo }) {
             onKeyDown={(e) => e.key === "Enter" && handleAdd()}
             style={{ flex: 1 }}
           />
+          <button className="btn btn-primary" style={{ marginTop: 0, padding: "6px 14px" }} onClick={handleAdd}>Añadir</button>
+          <button className="btn btn-ghost" style={{ marginTop: 0, padding: "6px 14px" }} onClick={() => setShowAdd(false)}>✕</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Tipo de compañía: dropdown + agregar ──────────────────
+function TipoCompaniaSelect({ value, onChange, allTipos, onAddTipo }) {
+  const [newTipo, setNewTipo] = useState("");
+  const [showAdd, setShowAdd] = useState(false);
+
+  const handleAdd = () => {
+    const trimmed = newTipo.trim();
+    if (!trimmed || allTipos.includes(trimmed)) return;
+    onAddTipo(trimmed);
+    onChange({ target: { name: "tipoCompania", value: trimmed } });
+    setNewTipo(""); setShowAdd(false);
+  };
+
+  return (
+    <div>
+      <select name="tipoCompania" value={value || ""} onChange={onChange}>
+        <option value="">— Seleccionar —</option>
+        {allTipos.map((t) => <option key={t} value={t}>{t}</option>)}
+      </select>
+      <button type="button" className="btn-add-small" style={{ marginTop: 6 }} onClick={() => setShowAdd(!showAdd)}>
+        + Agregar tipo
+      </button>
+      {showAdd && (
+        <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+          <input value={newTipo} onChange={(e) => setNewTipo(e.target.value)} placeholder="Ej: Startup, Agencia, ONG..."
+            onKeyDown={(e) => e.key === "Enter" && handleAdd()} style={{ flex: 1 }} />
           <button className="btn btn-primary" style={{ marginTop: 0, padding: "6px 14px" }} onClick={handleAdd}>Añadir</button>
           <button className="btn btn-ghost" style={{ marginTop: 0, padding: "6px 14px" }} onClick={() => setShowAdd(false)}>✕</button>
         </div>
@@ -636,17 +676,7 @@ export default function App() {
         </div>
         <div className="form-group">
           <label>Tipo de compañía</label>
-          <input
-            name="tipoCompania"
-            list="lista-tipo-compania"
-            value={f.tipoCompania}
-            onChange={handlers.onChange}
-            onBlur={(e) => handlers.onCompaniaBlur(e.target.value)}
-            placeholder="Ej: Startup, Agencia, ONG..."
-          />
-          <datalist id="lista-tipo-compania">
-            {tiposCompania.map((t) => <option key={t} value={t} />)}
-          </datalist>
+          <TipoCompaniaSelect value={f.tipoCompania} onChange={handlers.onChange} allTipos={tiposCompania} onAddTipo={handleAddTipoCompania} />
         </div>
         <div className="form-group">
           <label>País *</label>
@@ -869,7 +899,7 @@ export default function App() {
             <div className="contacts-list">
               {c.proyectos.filter((p) => p.nombre || p.link).map((p, i) => (
                 <div key={i} className="contact-chip">
-                  <span className="contact-chip-num">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="contact-chip-num">{p.numero || String(i + 1).padStart(2, "0")}</span>
                   {p.nombre && <span className="contact-chip-name">{p.nombre}</span>}
                   {p.link && <a href={p.link} target="_blank" rel="noopener noreferrer" className="result-link" style={{ fontSize: 12 }}>🔗 Link</a>}
                 </div>
@@ -885,7 +915,7 @@ export default function App() {
               {c.referenciasVisuales.filter((r) => r.link).map((r, i) => (
                 <div key={i} className="contact-chip" style={{ flexDirection: "column", alignItems: "flex-start" }}>
                   <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                    <span className="contact-chip-num">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="contact-chip-num">{r.numero || String(i + 1).padStart(2, "0")}</span>
                     <a href={r.link} target="_blank" rel="noopener noreferrer" className="result-link">🔗 Ver referencia</a>
                   </div>
                   {r.nota && <span style={{ fontSize: 12, color: "var(--muted)", paddingLeft: 28 }}>{r.nota}</span>}
@@ -901,8 +931,7 @@ export default function App() {
             <div className="contacts-list">
               {c.fechasEntrega.filter((f) => f.fecha).map((f, i) => (
                 <div key={i} className="contact-chip">
-                  <span className="contact-chip-num">{String(i + 1).padStart(2, "0")}</span>
-                  <span className="contact-chip-name">{f.fecha}</span>
+                  <span className="contact-chip-num">{f.numero || String(i + 1).padStart(2, "0")}</span>
                   {f.descripcion && <span className="contact-chip-rol">{f.descripcion}</span>}
                 </div>
               ))}
@@ -1158,7 +1187,7 @@ export default function App() {
                   </select>
                   {tiposCompania.length > 0 && (
                     <select name="tipoCompania" value={filters.tipoCompania} onChange={handleFilter} className="filter-select">
-                      <option value="">🏢 Tipo compañía</option>
+                      <option value="">🏢 Compañía</option>
                       {tiposCompania.map((t) => <option key={t} value={t}>{t}</option>)}
                     </select>
                   )}
