@@ -41,6 +41,186 @@ const BASE_TIPOS_ESTILO = ["Live", "Animado", "Live Mixto", "Animado Mixto", "Mi
 const STATUS_OPTIONS = ["Activo", "Pausa", "Inactivo", "Completado"];
 const POR_DONDE_OPTIONS = ["Redes sociales", "Recomendación", "Google", "LinkedIn", "Instagram", "YouTube", "Evento", "Otro"];
 
+const PAISES_EXTRA = [
+  { nombre: "Haiti", codigo: "HT", prefijo: "+509" },
+  { nombre: "Jamaica", codigo: "JM", prefijo: "+1876" },
+  { nombre: "Trinidad y Tobago", codigo: "TT", prefijo: "+1868" },
+  { nombre: "Antigua y Barbuda", codigo: "AG", prefijo: "+1268" },
+  { nombre: "Bahamas", codigo: "BS", prefijo: "+1242" },
+  { nombre: "Barbados", codigo: "BB", prefijo: "+1246" },
+  { nombre: "Belice", codigo: "BZ", prefijo: "+501" },
+  { nombre: "Dominica", codigo: "DM", prefijo: "+1767" },
+  { nombre: "Granada", codigo: "GD", prefijo: "+1473" },
+  { nombre: "Guyana", codigo: "GY", prefijo: "+592" },
+  { nombre: "San Cristobal y Nieves", codigo: "KN", prefijo: "+1869" },
+  { nombre: "San Vicente y Granadinas", codigo: "VC", prefijo: "+1784" },
+  { nombre: "Santa Lucia", codigo: "LC", prefijo: "+1758" },
+  { nombre: "Surinam", codigo: "SR", prefijo: "+597" },
+  { nombre: "Canada", codigo: "CA", prefijo: "+1" },
+  { nombre: "Albania", codigo: "AL", prefijo: "+355" },
+  { nombre: "Alemania", codigo: "DE", prefijo: "+49" },
+  { nombre: "Austria", codigo: "AT", prefijo: "+43" },
+  { nombre: "Belgica", codigo: "BE", prefijo: "+32" },
+  { nombre: "Bielorrusia", codigo: "BY", prefijo: "+375" },
+  { nombre: "Bosnia y Herzegovina", codigo: "BA", prefijo: "+387" },
+  { nombre: "Bulgaria", codigo: "BG", prefijo: "+359" },
+  { nombre: "Chipre", codigo: "CY", prefijo: "+357" },
+  { nombre: "Ciudad del Vaticano", codigo: "VA", prefijo: "+379" },
+  { nombre: "Croacia", codigo: "HR", prefijo: "+385" },
+  { nombre: "Dinamarca", codigo: "DK", prefijo: "+45" },
+  { nombre: "Eslovaquia", codigo: "SK", prefijo: "+421" },
+  { nombre: "Eslovenia", codigo: "SI", prefijo: "+386" },
+  { nombre: "Estonia", codigo: "EE", prefijo: "+372" },
+  { nombre: "Finlandia", codigo: "FI", prefijo: "+358" },
+  { nombre: "Grecia", codigo: "GR", prefijo: "+30" },
+  { nombre: "Hungria", codigo: "HU", prefijo: "+36" },
+  { nombre: "Irlanda", codigo: "IE", prefijo: "+353" },
+  { nombre: "Islandia", codigo: "IS", prefijo: "+354" },
+  { nombre: "Kosovo", codigo: "XK", prefijo: "+383" },
+  { nombre: "Letonia", codigo: "LV", prefijo: "+371" },
+  { nombre: "Liechtenstein", codigo: "LI", prefijo: "+423" },
+  { nombre: "Lituania", codigo: "LT", prefijo: "+370" },
+  { nombre: "Luxemburgo", codigo: "LU", prefijo: "+352" },
+  { nombre: "Macedonia del Norte", codigo: "MK", prefijo: "+389" },
+  { nombre: "Malta", codigo: "MT", prefijo: "+356" },
+  { nombre: "Moldavia", codigo: "MD", prefijo: "+373" },
+  { nombre: "Monaco", codigo: "MC", prefijo: "+377" },
+  { nombre: "Montenegro", codigo: "ME", prefijo: "+382" },
+  { nombre: "Noruega", codigo: "NO", prefijo: "+47" },
+  { nombre: "Paises Bajos", codigo: "NL", prefijo: "+31" },
+  { nombre: "Polonia", codigo: "PL", prefijo: "+48" },
+  { nombre: "Republica Checa", codigo: "CZ", prefijo: "+420" },
+  { nombre: "Rumania", codigo: "RO", prefijo: "+40" },
+  { nombre: "Rusia", codigo: "RU", prefijo: "+7" },
+  { nombre: "San Marino", codigo: "SM", prefijo: "+378" },
+  { nombre: "Serbia", codigo: "RS", prefijo: "+381" },
+  { nombre: "Suecia", codigo: "SE", prefijo: "+46" },
+  { nombre: "Suiza", codigo: "CH", prefijo: "+41" },
+  { nombre: "Ucrania", codigo: "UA", prefijo: "+380" },
+  { nombre: "Afganistan", codigo: "AF", prefijo: "+93" },
+  { nombre: "Arabia Saudita", codigo: "SA", prefijo: "+966" },
+  { nombre: "Armenia", codigo: "AM", prefijo: "+374" },
+  { nombre: "Azerbaiyan", codigo: "AZ", prefijo: "+994" },
+  { nombre: "Bahrein", codigo: "BH", prefijo: "+973" },
+  { nombre: "Bangladesh", codigo: "BD", prefijo: "+880" },
+  { nombre: "Brunei", codigo: "BN", prefijo: "+673" },
+  { nombre: "Butan", codigo: "BT", prefijo: "+975" },
+  { nombre: "Camboya", codigo: "KH", prefijo: "+855" },
+  { nombre: "China", codigo: "CN", prefijo: "+86" },
+  { nombre: "Corea del Norte", codigo: "KP", prefijo: "+850" },
+  { nombre: "Corea del Sur", codigo: "KR", prefijo: "+82" },
+  { nombre: "Emiratos Arabes Unidos", codigo: "AE", prefijo: "+971" },
+  { nombre: "Filipinas", codigo: "PH", prefijo: "+63" },
+  { nombre: "Georgia", codigo: "GE", prefijo: "+995" },
+  { nombre: "India", codigo: "IN", prefijo: "+91" },
+  { nombre: "Indonesia", codigo: "ID", prefijo: "+62" },
+  { nombre: "Irak", codigo: "IQ", prefijo: "+964" },
+  { nombre: "Iran", codigo: "IR", prefijo: "+98" },
+  { nombre: "Israel", codigo: "IL", prefijo: "+972" },
+  { nombre: "Japon", codigo: "JP", prefijo: "+81" },
+  { nombre: "Jordania", codigo: "JO", prefijo: "+962" },
+  { nombre: "Kazajistan", codigo: "KZ", prefijo: "+7" },
+  { nombre: "Kirguistan", codigo: "KG", prefijo: "+996" },
+  { nombre: "Kuwait", codigo: "KW", prefijo: "+965" },
+  { nombre: "Laos", codigo: "LA", prefijo: "+856" },
+  { nombre: "Libano", codigo: "LB", prefijo: "+961" },
+  { nombre: "Malasia", codigo: "MY", prefijo: "+60" },
+  { nombre: "Maldivas", codigo: "MV", prefijo: "+960" },
+  { nombre: "Mongolia", codigo: "MN", prefijo: "+976" },
+  { nombre: "Myanmar", codigo: "MM", prefijo: "+95" },
+  { nombre: "Nepal", codigo: "NP", prefijo: "+977" },
+  { nombre: "Oman", codigo: "OM", prefijo: "+968" },
+  { nombre: "Pakistan", codigo: "PK", prefijo: "+92" },
+  { nombre: "Palestina", codigo: "PS", prefijo: "+970" },
+  { nombre: "Qatar", codigo: "QA", prefijo: "+974" },
+  { nombre: "Singapur", codigo: "SG", prefijo: "+65" },
+  { nombre: "Siria", codigo: "SY", prefijo: "+963" },
+  { nombre: "Sri Lanka", codigo: "LK", prefijo: "+94" },
+  { nombre: "Tailandia", codigo: "TH", prefijo: "+66" },
+  { nombre: "Taiwan", codigo: "TW", prefijo: "+886" },
+  { nombre: "Tayikistan", codigo: "TJ", prefijo: "+992" },
+  { nombre: "Timor Oriental", codigo: "TL", prefijo: "+670" },
+  { nombre: "Turkmenistan", codigo: "TM", prefijo: "+993" },
+  { nombre: "Turquia", codigo: "TR", prefijo: "+90" },
+  { nombre: "Uzbekistan", codigo: "UZ", prefijo: "+998" },
+  { nombre: "Vietnam", codigo: "VN", prefijo: "+84" },
+  { nombre: "Yemen", codigo: "YE", prefijo: "+967" },
+  { nombre: "Angola", codigo: "AO", prefijo: "+244" },
+  { nombre: "Argelia", codigo: "DZ", prefijo: "+213" },
+  { nombre: "Benin", codigo: "BJ", prefijo: "+229" },
+  { nombre: "Botsuana", codigo: "BW", prefijo: "+267" },
+  { nombre: "Burkina Faso", codigo: "BF", prefijo: "+226" },
+  { nombre: "Burundi", codigo: "BI", prefijo: "+257" },
+  { nombre: "Cabo Verde", codigo: "CV", prefijo: "+238" },
+  { nombre: "Camerun", codigo: "CM", prefijo: "+237" },
+  { nombre: "Chad", codigo: "TD", prefijo: "+235" },
+  { nombre: "Comoras", codigo: "KM", prefijo: "+269" },
+  { nombre: "Congo", codigo: "CG", prefijo: "+242" },
+  { nombre: "Costa de Marfil", codigo: "CI", prefijo: "+225" },
+  { nombre: "Djibouti", codigo: "DJ", prefijo: "+253" },
+  { nombre: "Egipto", codigo: "EG", prefijo: "+20" },
+  { nombre: "Eritrea", codigo: "ER", prefijo: "+291" },
+  { nombre: "Etiopia", codigo: "ET", prefijo: "+251" },
+  { nombre: "Gabon", codigo: "GA", prefijo: "+241" },
+  { nombre: "Gambia", codigo: "GM", prefijo: "+220" },
+  { nombre: "Ghana", codigo: "GH", prefijo: "+233" },
+  { nombre: "Guinea", codigo: "GN", prefijo: "+224" },
+  { nombre: "Guinea Ecuatorial", codigo: "GQ", prefijo: "+240" },
+  { nombre: "Guinea-Bisau", codigo: "GW", prefijo: "+245" },
+  { nombre: "Kenya", codigo: "KE", prefijo: "+254" },
+  { nombre: "Lesoto", codigo: "LS", prefijo: "+266" },
+  { nombre: "Liberia", codigo: "LR", prefijo: "+231" },
+  { nombre: "Libia", codigo: "LY", prefijo: "+218" },
+  { nombre: "Madagascar", codigo: "MG", prefijo: "+261" },
+  { nombre: "Malawi", codigo: "MW", prefijo: "+265" },
+  { nombre: "Mali", codigo: "ML", prefijo: "+223" },
+  { nombre: "Marruecos", codigo: "MA", prefijo: "+212" },
+  { nombre: "Mauricio", codigo: "MU", prefijo: "+230" },
+  { nombre: "Mauritania", codigo: "MR", prefijo: "+222" },
+  { nombre: "Mozambique", codigo: "MZ", prefijo: "+258" },
+  { nombre: "Namibia", codigo: "NA", prefijo: "+264" },
+  { nombre: "Niger", codigo: "NE", prefijo: "+227" },
+  { nombre: "Nigeria", codigo: "NG", prefijo: "+234" },
+  { nombre: "Republica Centroafricana", codigo: "CF", prefijo: "+236" },
+  { nombre: "Republica Democratica del Congo", codigo: "CD", prefijo: "+243" },
+  { nombre: "Ruanda", codigo: "RW", prefijo: "+250" },
+  { nombre: "Santo Tome y Principe", codigo: "ST", prefijo: "+239" },
+  { nombre: "Senegal", codigo: "SN", prefijo: "+221" },
+  { nombre: "Seychelles", codigo: "SC", prefijo: "+248" },
+  { nombre: "Sierra Leona", codigo: "SL", prefijo: "+232" },
+  { nombre: "Somalia", codigo: "SO", prefijo: "+252" },
+  { nombre: "Sudafrica", codigo: "ZA", prefijo: "+27" },
+  { nombre: "Sudan", codigo: "SD", prefijo: "+249" },
+  { nombre: "Sudan del Sur", codigo: "SS", prefijo: "+211" },
+  { nombre: "Suazilandia", codigo: "SZ", prefijo: "+268" },
+  { nombre: "Tanzania", codigo: "TZ", prefijo: "+255" },
+  { nombre: "Togo", codigo: "TG", prefijo: "+228" },
+  { nombre: "Tunez", codigo: "TN", prefijo: "+216" },
+  { nombre: "Uganda", codigo: "UG", prefijo: "+256" },
+  { nombre: "Zambia", codigo: "ZM", prefijo: "+260" },
+  { nombre: "Zimbabue", codigo: "ZW", prefijo: "+263" },
+  { nombre: "Australia", codigo: "AU", prefijo: "+61" },
+  { nombre: "Fiyi", codigo: "FJ", prefijo: "+679" },
+  { nombre: "Islas Marshall", codigo: "MH", prefijo: "+692" },
+  { nombre: "Islas Salomon", codigo: "SB", prefijo: "+677" },
+  { nombre: "Kiribati", codigo: "KI", prefijo: "+686" },
+  { nombre: "Micronesia", codigo: "FM", prefijo: "+691" },
+  { nombre: "Nauru", codigo: "NR", prefijo: "+674" },
+  { nombre: "Nueva Zelanda", codigo: "NZ", prefijo: "+64" },
+  { nombre: "Palaos", codigo: "PW", prefijo: "+680" },
+  { nombre: "Papua Nueva Guinea", codigo: "PG", prefijo: "+675" },
+  { nombre: "Samoa", codigo: "WS", prefijo: "+685" },
+  { nombre: "Tonga", codigo: "TO", prefijo: "+676" },
+  { nombre: "Tuvalu", codigo: "TV", prefijo: "+688" },
+  { nombre: "Vanuatu", codigo: "VU", prefijo: "+678" },
+];
+// Merge: PAISES base + todos los adicionales, ordenados por nombre
+const TODOS_PAISES = [...PAISES, ...PAISES_EXTRA].sort((a, b) => {
+  if (a.codigo === "XX") return 1;
+  if (b.codigo === "XX") return -1;
+  return a.nombre.localeCompare(b.nombre, "es");
+});
+
 const TAG_TRABAJO = {
   Learning: "tag-learning", Social: "tag-social", Corporativo: "tag-corporativo",
   Show: "tag-show", Mixto: "tag-mixto", Desconocido: "tag-desconocido",
@@ -56,6 +236,9 @@ const TAG_STATUS = {
   Inactivo: "tag-status-inactivo",
   Completado: "tag-status-completado",
 };
+
+// ── Países adicionales agregados ──────────────────────────
+// (Se agregan al array PAISES en la parte de arriba del archivo)
 
 const emptyContact = () => ({ nombre: "", apellido: "", rol: "" });
 const emptyEmail = () => ({ email: "", nota: "" });
@@ -123,18 +306,13 @@ function EmailsBlock({ emails, onChange, onAdd, onRemove }) {
   );
 }
 
-// ── Proyectos (número editable) ────────────────────────────
+// ── Proyectos ──────────────────────────────────────────────
 function ProyectosBlock({ proyectos, onChange, onAdd, onRemove }) {
   return (
     <>
       {proyectos.map((p, i) => (
         <div className="contact-row" key={i}>
-          <input
-            value={p.numero !== undefined && p.numero !== "" ? p.numero : String(i + 1).padStart(2, "0")}
-            onChange={(e) => onChange(i, "numero", e.target.value)}
-            className="numero-editable"
-            title="Número (editable)"
-          />
+          <div className="contact-num">{String(i + 1).padStart(2, "0")}</div>
           <div className="contact-fields">
             <input value={p.nombre} onChange={(e) => onChange(i, "nombre", e.target.value)} placeholder="Nombre del proyecto" />
             <input value={p.link} onChange={(e) => onChange(i, "link", e.target.value)} placeholder="https://..." style={{ flex: 1.5 }} />
@@ -147,21 +325,25 @@ function ProyectosBlock({ proyectos, onChange, onAdd, onRemove }) {
   );
 }
 
-// ── Fechas de entrega (número editable) ───────────────────
+// ── Fechas de entrega ──────────────────────────────────────
 function FechasEntregaBlock({ fechas, onChange, onAdd, onRemove }) {
   return (
     <>
       {fechas.map((f, i) => (
         <div className="contact-row" key={i} style={{ alignItems: "center" }}>
-          <input
-            value={f.numero !== undefined && f.numero !== "" ? f.numero : String(i + 1).padStart(2, "0")}
-            onChange={(e) => onChange(i, "numero", e.target.value)}
-            className="numero-editable"
-            title="Número (editable)"
-          />
+          <div className="contact-num">{String(i + 1).padStart(2, "0")}</div>
           <div className="contact-fields">
-            <input type="date" value={f.fecha} onChange={(e) => onChange(i, "fecha", e.target.value)} style={{ maxWidth: 200 }} />
-            <input value={f.descripcion || ""} onChange={(e) => onChange(i, "descripcion", e.target.value)} placeholder="Descripción (opcional)" />
+            <input
+              type="date"
+              value={f.fecha}
+              onChange={(e) => onChange(i, "fecha", e.target.value)}
+              style={{ maxWidth: 200 }}
+            />
+            <input
+              value={f.descripcion || ""}
+              onChange={(e) => onChange(i, "descripcion", e.target.value)}
+              placeholder="Descripción (opcional)"
+            />
           </div>
           <button className="btn-remove" onClick={() => onRemove(i)}>✕</button>
         </div>
@@ -177,12 +359,7 @@ function ReferenciasVisualesBlock({ referencias, onChange, onAdd, onRemove }) {
     <>
       {referencias.map((r, i) => (
         <div className="contact-row" key={i}>
-          <input
-            value={r.numero !== undefined && r.numero !== "" ? r.numero : String(i + 1).padStart(2, "0")}
-            onChange={(e) => onChange(i, "numero", e.target.value)}
-            className="numero-editable"
-            title="Número (editable)"
-          />
+          <div className="contact-num">{String(i + 1).padStart(2, "0")}</div>
           <div className="contact-fields">
             <input value={r.link} onChange={(e) => onChange(i, "link", e.target.value)} placeholder="https://..." style={{ flex: 1.5 }} />
             <input value={r.nota} onChange={(e) => onChange(i, "nota", e.target.value)} placeholder="Nota sobre esta referencia..." />
@@ -245,40 +422,6 @@ function EstilosMultiSelect({ selected, onChange, allEstilos, onAddEstilo }) {
   );
 }
 
-// ── Tipo de compañía: dropdown + agregar ──────────────────
-function TipoCompaniaSelect({ value, onChange, allTipos, onAddTipo }) {
-  const [newTipo, setNewTipo] = useState("");
-  const [showAdd, setShowAdd] = useState(false);
-
-  const handleAdd = () => {
-    const trimmed = newTipo.trim();
-    if (!trimmed || allTipos.includes(trimmed)) return;
-    onAddTipo(trimmed);
-    onChange({ target: { name: "tipoCompania", value: trimmed } });
-    setNewTipo(""); setShowAdd(false);
-  };
-
-  return (
-    <div>
-      <select name="tipoCompania" value={value || ""} onChange={onChange}>
-        <option value="">— Seleccionar —</option>
-        {allTipos.map((t) => <option key={t} value={t}>{t}</option>)}
-      </select>
-      <button type="button" className="btn-add-small" style={{ marginTop: 6 }} onClick={() => setShowAdd(!showAdd)}>
-        + Agregar tipo
-      </button>
-      {showAdd && (
-        <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-          <input value={newTipo} onChange={(e) => setNewTipo(e.target.value)} placeholder="Ej: Startup, Agencia, ONG..."
-            onKeyDown={(e) => e.key === "Enter" && handleAdd()} style={{ flex: 1 }} />
-          <button className="btn btn-primary" style={{ marginTop: 0, padding: "6px 14px" }} onClick={handleAdd}>Añadir</button>
-          <button className="btn btn-ghost" style={{ marginTop: 0, padding: "6px 14px" }} onClick={() => setShowAdd(false)}>✕</button>
-        </div>
-      )}
-    </div>
-  );
-}
-
 // ── Tipo de trabajo con categoría custom ───────────────────
 function TipoTrabajoSelect({ value, onChange, allTipos, onAddTipo }) {
   const [newTipo, setNewTipo] = useState("");
@@ -325,7 +468,7 @@ function TipoTrabajoSelect({ value, onChange, allTipos, onAddTipo }) {
 
 // ── Export ficha para editor ───────────────────────────────
 function exportarFichaEditor(client) {
-  const paisNombre = (codigo) => PAISES.find((p) => p.codigo === codigo)?.nombre || codigo;
+  const paisNombre = (codigo) => TODOS_PAISES.find((p) => p.codigo === codigo)?.nombre || codigo;
 
   const estilos = Array.isArray(client.tiposEstilo) && client.tiposEstilo.length > 0
     ? client.tiposEstilo.join(", ")
@@ -476,7 +619,7 @@ export default function App() {
 
   // ── Prefijo telefónico automático ────────────────────────
   useEffect(() => {
-    const paisSel = PAISES.find((p) => p.codigo === form.pais);
+    const paisSel = TODOS_PAISES.find((p) => p.codigo === form.pais);
     if (paisSel) setForm((f) => ({ ...f, telefono: paisSel.prefijo }));
   }, [form.pais]);
 
@@ -660,7 +803,7 @@ export default function App() {
   const handleFilter = (e) => setFilters((f) => ({ ...f, [e.target.name]: e.target.value }));
   const clearFilters = () => setFilters({ search: "", pais: "", tipoTrabajo: "", tipoEstilo: "", status: "", tipoCompania: "" });
 
-  const paisNombre = (codigo) => PAISES.find((p) => p.codigo === codigo)?.nombre || codigo;
+  const paisNombre = (codigo) => TODOS_PAISES.find((p) => p.codigo === codigo)?.nombre || codigo;
   const clientCount = Object.keys(clients).length;
   const hasFilters = filters.search || filters.pais || filters.tipoTrabajo || filters.tipoEstilo || filters.status || filters.tipoCompania;
 
@@ -676,12 +819,22 @@ export default function App() {
         </div>
         <div className="form-group">
           <label>Tipo de compañía</label>
-          <TipoCompaniaSelect value={f.tipoCompania} onChange={handlers.onChange} allTipos={tiposCompania} onAddTipo={handleAddTipoCompania} />
+          <input
+            name="tipoCompania"
+            list="lista-tipo-compania"
+            value={f.tipoCompania}
+            onChange={handlers.onChange}
+            onBlur={(e) => handlers.onCompaniaBlur(e.target.value)}
+            placeholder="Ej: Startup, Agencia, ONG..."
+          />
+          <datalist id="lista-tipo-compania">
+            {tiposCompania.map((t) => <option key={t} value={t} />)}
+          </datalist>
         </div>
         <div className="form-group">
           <label>País *</label>
           <select name="pais" value={f.pais} onChange={handlers.onChange}>
-            {PAISES.map((p) => <option key={p.codigo} value={p.codigo}>{p.nombre}</option>)}
+            {TODOS_PAISES.map((p) => <option key={p.codigo} value={p.codigo}>{p.nombre}</option>)}
           </select>
         </div>
         <div className="form-group">
@@ -899,7 +1052,7 @@ export default function App() {
             <div className="contacts-list">
               {c.proyectos.filter((p) => p.nombre || p.link).map((p, i) => (
                 <div key={i} className="contact-chip">
-                  <span className="contact-chip-num">{p.numero || String(i + 1).padStart(2, "0")}</span>
+                  <span className="contact-chip-num">{String(i + 1).padStart(2, "0")}</span>
                   {p.nombre && <span className="contact-chip-name">{p.nombre}</span>}
                   {p.link && <a href={p.link} target="_blank" rel="noopener noreferrer" className="result-link" style={{ fontSize: 12 }}>🔗 Link</a>}
                 </div>
@@ -915,7 +1068,7 @@ export default function App() {
               {c.referenciasVisuales.filter((r) => r.link).map((r, i) => (
                 <div key={i} className="contact-chip" style={{ flexDirection: "column", alignItems: "flex-start" }}>
                   <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                    <span className="contact-chip-num">{r.numero || String(i + 1).padStart(2, "0")}</span>
+                    <span className="contact-chip-num">{String(i + 1).padStart(2, "0")}</span>
                     <a href={r.link} target="_blank" rel="noopener noreferrer" className="result-link">🔗 Ver referencia</a>
                   </div>
                   {r.nota && <span style={{ fontSize: 12, color: "var(--muted)", paddingLeft: 28 }}>{r.nota}</span>}
@@ -931,7 +1084,8 @@ export default function App() {
             <div className="contacts-list">
               {c.fechasEntrega.filter((f) => f.fecha).map((f, i) => (
                 <div key={i} className="contact-chip">
-                  <span className="contact-chip-num">{f.numero || String(i + 1).padStart(2, "0")}</span>
+                  <span className="contact-chip-num">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="contact-chip-name">{f.fecha}</span>
                   {f.descripcion && <span className="contact-chip-rol">{f.descripcion}</span>}
                 </div>
               ))}
@@ -1168,7 +1322,7 @@ export default function App() {
                 <div className="filters-row">
                   <select name="pais" value={filters.pais} onChange={handleFilter} className="filter-select">
                     <option value="">🌍 País</option>
-                    {PAISES.map((p) => <option key={p.codigo} value={p.codigo}>{p.nombre}</option>)}
+                    {TODOS_PAISES.filter(p => p.codigo !== "XX").map((p) => <option key={p.codigo} value={p.codigo}>{p.nombre}</option>)}
                   </select>
                   <select name="tipoTrabajo" value={filters.tipoTrabajo} onChange={handleFilter} className="filter-select">
                     <option value="">🎯 Trabajo</option>
@@ -1187,7 +1341,7 @@ export default function App() {
                   </select>
                   {tiposCompania.length > 0 && (
                     <select name="tipoCompania" value={filters.tipoCompania} onChange={handleFilter} className="filter-select">
-                      <option value="">🏢 Compañía</option>
+                      <option value="">🏢 Tipo compañía</option>
                       {tiposCompania.map((t) => <option key={t} value={t}>{t}</option>)}
                     </select>
                   )}
