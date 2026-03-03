@@ -242,9 +242,9 @@ const TAG_STATUS = {
 
 const emptyContact = () => ({ nombre: "", apellido: "", rol: "" });
 const emptyEmail = () => ({ email: "", nota: "" });
-const emptyProyecto = () => ({ nombre: "", link: "" });
-const emptyFechaEntrega = () => ({ fecha: "" });
-const emptyReferenciaVisual = () => ({ link: "", nota: "" });
+const emptyProyecto = () => ({ numero: "", nombre: "", link: "" });
+const emptyFechaEntrega = () => ({ numero: "", fecha: "", descripcion: "" });
+const emptyReferenciaVisual = () => ({ numero: "", link: "", nota: "" });
 
 const defaultForm = () => ({
   empresa: "",
@@ -312,7 +312,12 @@ function ProyectosBlock({ proyectos, onChange, onAdd, onRemove }) {
     <>
       {proyectos.map((p, i) => (
         <div className="contact-row" key={i}>
-          <div className="contact-num">{String(i + 1).padStart(2, "0")}</div>
+          <input
+            value={p.numero !== undefined && p.numero !== "" ? p.numero : String(i + 1).padStart(2, "0")}
+            onChange={(e) => onChange(i, "numero", e.target.value)}
+            className="numero-editable"
+            title="Número (editable)"
+          />
           <div className="contact-fields">
             <input value={p.nombre} onChange={(e) => onChange(i, "nombre", e.target.value)} placeholder="Nombre del proyecto" />
             <input value={p.link} onChange={(e) => onChange(i, "link", e.target.value)} placeholder="https://..." style={{ flex: 1.5 }} />
@@ -331,19 +336,15 @@ function FechasEntregaBlock({ fechas, onChange, onAdd, onRemove }) {
     <>
       {fechas.map((f, i) => (
         <div className="contact-row" key={i} style={{ alignItems: "center" }}>
-          <div className="contact-num">{String(i + 1).padStart(2, "0")}</div>
+          <input
+            value={f.numero !== undefined && f.numero !== "" ? f.numero : String(i + 1).padStart(2, "0")}
+            onChange={(e) => onChange(i, "numero", e.target.value)}
+            className="numero-editable"
+            title="Número (editable)"
+          />
           <div className="contact-fields">
-            <input
-              type="date"
-              value={f.fecha}
-              onChange={(e) => onChange(i, "fecha", e.target.value)}
-              style={{ maxWidth: 200 }}
-            />
-            <input
-              value={f.descripcion || ""}
-              onChange={(e) => onChange(i, "descripcion", e.target.value)}
-              placeholder="Descripción (opcional)"
-            />
+            <input type="date" value={f.fecha} onChange={(e) => onChange(i, "fecha", e.target.value)} style={{ maxWidth: 200 }} />
+            <input value={f.descripcion || ""} onChange={(e) => onChange(i, "descripcion", e.target.value)} placeholder="Descripción (opcional)" />
           </div>
           <button className="btn-remove" onClick={() => onRemove(i)}>✕</button>
         </div>
@@ -359,7 +360,12 @@ function ReferenciasVisualesBlock({ referencias, onChange, onAdd, onRemove }) {
     <>
       {referencias.map((r, i) => (
         <div className="contact-row" key={i}>
-          <div className="contact-num">{String(i + 1).padStart(2, "0")}</div>
+          <input
+            value={r.numero !== undefined && r.numero !== "" ? r.numero : String(i + 1).padStart(2, "0")}
+            onChange={(e) => onChange(i, "numero", e.target.value)}
+            className="numero-editable"
+            title="Número (editable)"
+          />
           <div className="contact-fields">
             <input value={r.link} onChange={(e) => onChange(i, "link", e.target.value)} placeholder="https://..." style={{ flex: 1.5 }} />
             <input value={r.nota} onChange={(e) => onChange(i, "nota", e.target.value)} placeholder="Nota sobre esta referencia..." />
@@ -372,7 +378,52 @@ function ReferenciasVisualesBlock({ referencias, onChange, onAdd, onRemove }) {
   );
 }
 
-// ── Estilos multi-select ───────────────────────────────────
+// ── Tipo de compa&#241;&#237;a con categor&#237;a custom ─────────────────
+function TipoCompaniaSelect({ value, onChange, allTipos, onAddTipo }) {
+  const [newTipo, setNewTipo] = useState("");
+  const [showAdd, setShowAdd] = useState(false);
+
+  const handleAdd = () => {
+    const trimmed = newTipo.trim();
+    if (!trimmed || allTipos.includes(trimmed)) return;
+    onAddTipo(trimmed);
+    onChange({ target: { name: "tipoCompania", value: trimmed } });
+    setNewTipo("");
+    setShowAdd(false);
+  };
+
+  return (
+    <div>
+      <select name="tipoCompania" value={value} onChange={onChange}>
+        <option value="">&#8212; Sin tipo &#8212;</option>
+        {allTipos.map((t) => <option key={t}>{t}</option>)}
+      </select>
+      <button
+        type="button"
+        className="btn-add-small"
+        style={{ marginTop: 6 }}
+        onClick={() => setShowAdd(!showAdd)}
+      >
+        + Agregar categor&#237;a
+      </button>
+      {showAdd && (
+        <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+          <input
+            value={newTipo}
+            onChange={(e) => setNewTipo(e.target.value)}
+            placeholder="Nueva categor&#237;a..."
+            onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+            style={{ flex: 1 }}
+          />
+          <button className="btn btn-primary" style={{ marginTop: 0, padding: "6px 14px" }} onClick={handleAdd}>&#193;&#241;adir</button>
+          <button className="btn btn-ghost" style={{ marginTop: 0, padding: "6px 14px" }} onClick={() => setShowAdd(false)}>&#10005;</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// &#9472;&#9472; Estilos multi-select &#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;&#9473;
 function EstilosMultiSelect({ selected, onChange, allEstilos, onAddEstilo }) {
   const [newEstilo, setNewEstilo] = useState("");
   const [showAdd, setShowAdd] = useState(false);
@@ -819,17 +870,12 @@ export default function App() {
         </div>
         <div className="form-group">
           <label>Tipo de compañía</label>
-          <input
-            name="tipoCompania"
-            list="lista-tipo-compania"
+          <TipoCompaniaSelect
             value={f.tipoCompania}
             onChange={handlers.onChange}
-            onBlur={(e) => handlers.onCompaniaBlur(e.target.value)}
-            placeholder="Ej: Startup, Agencia, ONG..."
+            allTipos={tiposCompania}
+            onAddTipo={handleAddTipoCompania}
           />
-          <datalist id="lista-tipo-compania">
-            {tiposCompania.map((t) => <option key={t} value={t} />)}
-          </datalist>
         </div>
         <div className="form-group">
           <label>País *</label>
@@ -1339,12 +1385,10 @@ export default function App() {
                     <option value="">📊 Status</option>
                     {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
                   </select>
-                  {tiposCompania.length > 0 && (
-                    <select name="tipoCompania" value={filters.tipoCompania} onChange={handleFilter} className="filter-select">
-                      <option value="">🏢 Tipo compañía</option>
-                      {tiposCompania.map((t) => <option key={t} value={t}>{t}</option>)}
-                    </select>
-                  )}
+                  <select name="tipoCompania" value={filters.tipoCompania} onChange={handleFilter} className="filter-select">
+                    <option value="">🏢 Tipo compañía</option>
+                    {tiposCompania.map((t) => <option key={t} value={t}>{t}</option>)}
+                  </select>
                   <button className="sort-button" onClick={() => setSortOrder(sortOrder === "newest" ? "oldest" : "newest")}
                     title={sortOrder === "newest" ? "Ordenar: más antiguo primero" : "Ordenar: más reciente primero"}>
                     {sortOrder === "newest" ? "🔽 Más reciente" : "🔼 Más antiguo"}
