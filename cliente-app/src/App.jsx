@@ -381,7 +381,6 @@ function ReferenciasVisualesBlock({ referencias, onChange, onAdd, onRemove }) {
 // ── Tipo de compa&#241;&#237;a con categor&#237;a custom ─────────────────
 function TipoCompaniaSelect({ value, onChange, allTipos, onAddTipo, onDeleteTipo }) {
   const [newTipo, setNewTipo] = useState("");
-  const [showAdd, setShowAdd] = useState(false);
 
   const handleAdd = () => {
     const trimmed = newTipo.trim();
@@ -389,7 +388,6 @@ function TipoCompaniaSelect({ value, onChange, allTipos, onAddTipo, onDeleteTipo
     onAddTipo(trimmed);
     onChange({ target: { name: "tipoCompania", value: trimmed } });
     setNewTipo("");
-    setShowAdd(false);
   };
 
   const handleDelete = (tipo) => {
@@ -399,31 +397,39 @@ function TipoCompaniaSelect({ value, onChange, allTipos, onAddTipo, onDeleteTipo
 
   return (
     <div>
-      <select name="tipoCompania" value={value} onChange={onChange}>
+      <select name="tipoCompania" value={value} onChange={onChange} style={{ marginBottom: 10 }}>
         <option value="">— Sin tipo —</option>
         {allTipos.map((t) => <option key={t}>{t}</option>)}
       </select>
+
       {allTipos.length > 0 && (
-        <div style={{ marginTop: 6, display: "flex", flexWrap: "wrap", gap: 4 }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
           {allTipos.map((t) => (
-            <span key={t} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 6, padding: "2px 8px", fontSize: 12 }}>
+            <span key={t} style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.25)", borderRadius: 20, padding: "3px 10px", fontSize: 12, color: "var(--text)" }}>
               {t}
-              <button type="button" onClick={() => handleDelete(t)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--muted)", padding: "0 2px", fontSize: 14, lineHeight: 1 }} title={"Borrar " + t}>&#10005;</button>
+              <button type="button" onClick={() => handleDelete(t)}
+                style={{ background: "none", border: "none", cursor: "pointer", color: "var(--muted)", padding: 0, fontSize: 13, lineHeight: 1, display: "flex", alignItems: "center" }}
+                title={"Borrar " + t}>&#10005;</button>
             </span>
           ))}
         </div>
       )}
-      <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-        <input
-          className="tipo-compania-input"
-          value={newTipo}
-          onChange={(e) => setNewTipo(e.target.value)}
-          placeholder="Escribe una categoría y pulsa Añadir..."
-          onKeyDown={(e) => e.key === "Enter" && handleAdd()}
-          style={{ flex: 1, color: "var(--text, #e8e8e8)", background: "var(--surface2, #1e1e2e)", WebkitTextFillColor: "var(--text, #e8e8e8)" }}
-        />
-        <button className="btn btn-primary" style={{ marginTop: 0, padding: "6px 14px" }} onClick={handleAdd} type="button">+ Añadir</button>
-      </div>
+
+      <input
+        value={newTipo}
+        onChange={(e) => setNewTipo(e.target.value)}
+        placeholder="Nueva categoría..."
+        onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+        style={{ width: "100%", marginBottom: 8, boxSizing: "border-box" }}
+      />
+      <button
+        className="btn-add-small"
+        onClick={handleAdd}
+        type="button"
+        style={{ width: "100%" }}
+      >
+        + Añadir categoría
+      </button>
     </div>
   );
 }
